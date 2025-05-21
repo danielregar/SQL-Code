@@ -1,0 +1,84 @@
+-- 🧼 Layoffs Data Cleaning: Kaggle Dataset (2023 - March 2025)
+-- Dataset includes company, location, industry, layoffs, funding, and more
+
+-- 🔧 Step 1: Create Staging Table
+CREATE TABLE layoffs_staging LIKE layoffs;
+
+INSERT INTO layoffs_staging
+SELECT * FROM layoffs;
+
+-- 🔍 Step 2: Remove Duplicates
+-- Add row numbers to detect duplicates
+WITH duplicate_cte AS (
+  SELECT *,
+         ROW_NUMBER() OVER(PARTITION BY company, location, industry, total_laid_off, percentage_laid_off, `date`, country) AS row_num
+  FROM layoffs_staging
+)
+SELECT * FROM duplicate_cte
+WHERE row_num > 1;
+
+-- Create clean staging table with row_num
+CREATE TABLE layoffs_staging2 (
+  company TEXT,
+  location TEXT,
+  industry TEXT,
+  total_laid_off DOUBLE,
+  percentage_laid_off TEXT,
+  `date` TEXT,
+  stage TEXT,
+  country TEXT,
+  funds_raised TEXT,
+  row_num INT
+);
+
+INSERT INTO layoffs_staging2
+SELECT *,
+       ROW_NUMBER() OVER(PARTITION BY company, location, industry, total_laid_off, percentage_laid_off, `date`, country) AS row_num
+FROM layoffs_staging;
+
+-- Delete duplicates
+DELETE FROM layoffs_staging2
+WHERE row_num > 1;
+
+-- ✨ Step 3: Standardize Data
+-- A. Clean company names
+UPDATE layoffs_staging2
+SET company = TRIM(company);
+
+-- B. Standardize location values
+UPDATE layoffs_staging2
+SET location = TRIM(REPLACE(REPLACE(REPLACE(location, "['", ''), "', 'Non-U.S.']", ''), "]", ''));
+
+-- C. Clean and trim dates
+ALTER TABLE layoffs_staging2 ADD COLUMN date_clean DATE;
+
+UPDATE layoffs_staging2
+SET date_clean = LEFT(`date`, 10);
+
+-- D. Fix percentage_laid_off to be numeric
+-- First convert column to appropriate numeric type if necessary
+-- UPDATE table_name MODIFY percentage_laid_off DOUBLE;
+
+UPDATE layoffs_staging2
+SET percentage_laid_off = ROUND(percentage_laid_off, 2)
+WHERE percentage_laid_off IS NOT NULL AND percentage_laid_off != '';
+
+-- Optional: Clear out 0 values if they are considered invalid
+UPDATE layoffs_staging2
+SET percentage_laid_off = NULL
+WHERE percentage_laid_off = 0;
+
+-- 🕳️ Step 4: Handle Missing Values
+-- A. Industry = '' → 'Other'
+UPDATE layoffs_staging2
+SET industry = 'Other'
+WHERE industry = '';
+
+-- B. Stage = '' → 'Unknown'
+UPDATE layoffs_staging2
+SET stage = 'Unknown'
+WHERE stage = '';
+
+-- 🧹 Step 5: Drop Unnecessary Columns
+ALTER TABLE layoffs_staging2 DROP COLUMN `date`;
+ALTER TABLE layoffs_staging2 DROP COLUMN row_num;
