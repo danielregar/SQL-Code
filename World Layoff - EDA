@@ -1,0 +1,92 @@
+-- 📊 World Layoffs EDA (2023 - March 2025)
+-- Exploratory Data Analysis for the cleaned layoffs dataset
+
+-- 🔍 Full Table Preview
+SELECT *
+FROM layoffs_staging2;
+
+-- 📈 Total Layoff Summary Stats
+SELECT 
+  COUNT(*) AS total_events,
+  SUM(total_laid_off) AS total_layoff,
+  MAX(total_laid_off) AS max_total_layoff,
+  ROUND(AVG(total_laid_off), 2) AS avg_total_layoff
+FROM layoffs_staging2;
+
+-- 🗓️ Layoffs Trend Over Time (by Quarter)
+SELECT 
+  CONCAT(YEAR(date_clean), '-Q', QUARTER(date_clean)) AS quarter,
+  SUM(total_laid_off) AS total_layoff
+FROM layoffs_staging2 
+GROUP BY quarter
+ORDER BY quarter;
+
+-- 🏢 Companies with Multiple Layoff Events
+SELECT 
+  company, 
+  COUNT(*) AS events, 
+  SUM(total_laid_off) AS total_layoff
+FROM layoffs_staging2
+GROUP BY company
+HAVING events > 1
+ORDER BY events DESC;
+
+-- 🏢 Total Laid Off by Company
+SELECT 
+  company, 
+  SUM(total_laid_off) AS total_layoff
+FROM layoffs_staging2
+GROUP BY company
+ORDER BY total_layoff DESC;
+
+-- 🏭 Total Laid Off by Industry
+SELECT 
+  industry, 
+  SUM(total_laid_off) AS total_layoff
+FROM layoffs_staging2
+WHERE industry != 'Other'
+GROUP BY industry
+ORDER BY total_layoff DESC;
+
+-- 🌍 Total Laid Off by Country
+SELECT 
+  country, 
+  SUM(total_laid_off) AS total_layoff
+FROM layoffs_staging2
+GROUP BY country
+ORDER BY total_layoff DESC;
+
+-- 🚀 Total Laid Off by Stage
+SELECT 
+  stage, 
+  SUM(total_laid_off) AS total_layoff
+FROM layoffs_staging2
+WHERE stage != 'Unknown'
+GROUP BY stage
+ORDER BY total_layoff DESC;
+
+-- 📆 Rolling Total of Layoffs by Year and Month
+SELECT
+  YEAR(date_clean) AS year,
+  MONTH(date_clean) AS month,
+  SUM(total_laid_off) AS monthly_laid_off,
+  SUM(SUM(total_laid_off)) OVER (
+    ORDER BY YEAR(date_clean), MONTH(date_clean)
+  ) AS rolling_total
+FROM layoffs_staging2
+GROUP BY YEAR(date_clean), MONTH(date_clean)
+ORDER BY year, month;
+
+-- 🏭 Rolling Total of Layoffs by Industry, Year and Month
+SELECT
+  industry,
+  YEAR(date_clean) AS year,
+  MONTH(date_clean) AS month,
+  SUM(total_laid_off) AS monthly_laid_off,
+  SUM(SUM(total_laid_off)) OVER (
+    PARTITION BY industry 
+    ORDER BY YEAR(date_clean), MONTH(date_clean)
+  ) AS rolling_total_industry
+FROM layoffs_staging2
+GROUP BY industry, YEAR(date_clean), MONTH(date_clean)
+ORDER BY industry, year, month;
