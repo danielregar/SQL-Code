@@ -1,60 +1,87 @@
-# 🧼 Layoffs Data Cleaning (SQL Project)
+# 🧼 Layoffs Data Cleaning & Analysis (SQL Project)
 
-This project focuses on cleaning a real-world dataset of tech and non-tech layoffs worldwide, covering 2023 to March 2025. The original dataset was sourced from [Kaggle]https://www.kaggle.com/datasets/happyude/world-layoffs?select=layoffs.csv, and contains raw records with inconsistencies, missing data, and formatting issues.
+This project focuses on cleaning and analyzing a real-world dataset of global tech and non-tech layoffs from **2023 to March 2025**. The original dataset was sourced from [Kaggle](https://www.kaggle.com/datasets/happyude/world-layoffs?select=layoffs.csv) and contains raw records with inconsistencies, missing values, and formatting issues.
 
 ---
 
 ## 🧾 Dataset Overview
 
-The original dataset includes the following fields:
+The original dataset contains the following columns:
 
 - `company`: Company name
-- `location`: Office location
-- `industry`: Industry type
+- `location`: Office location(s)
+- `industry`: Industry sector
 - `total_laid_off`: Number of employees laid off
-- `percentage_laid_off`: Proportion of the workforce affected
-- `stage`: Company growth stage (e.g., Series A, Series B)
+- `percentage_laid_off`: Proportion of total workforce affected
+- `stage`: Company growth stage (e.g., Seed, Series A, IPO)
 - `country`: Country of operation
-- `funds_raised`: Capital raised by the company
-- `date`: Layoff date
+- `funds_raised`: Total capital raised
+- `date`: Layoff date (timestamp format)
 
 ---
 
 ## 🧹 Data Cleaning Steps
 
-1. **Duplicate Removal**
-   - Used `ROW_NUMBER()` to identify and delete duplicate records based on key columns.
+Performed using MySQL to ensure data is structured and analysis-ready.
 
-2. **Standardization**
-   - Trimmed and cleaned company and location names.
-   - Extracted and standardized date format to `YYYY-MM-DD`.
-   - Converted and rounded `percentage_laid_off` values.
+### 1. Duplicate Removal
+- Used `ROW_NUMBER()` with `PARTITION BY` to identify and remove duplicate records.
 
-3. **Handling Null or Blank Values**
-   - Replaced empty `industry` with `'Other'`.
-   - Replaced empty `stage` with `'Unknown'`.
-   - Removed or NULL-ed invalid `percentage_laid_off` values (e.g., 0%).
+### 2. Data Standardization
+- Trimmed extra spaces from text fields.
+- Cleaned `location` values to remove inconsistent formatting (e.g., `[‘City’, 'Non-U.S.']`).
+- Converted `date` values from text to date `YYYY-MM-DD`.
+- Rounded and cleaned `percentage_laid_off` values.
 
-4. **Column Cleanup**
-   - Removed intermediate columns used for transformation (`row_num`, raw `date` string).
+### 3. Handling Null & Blank Values
+- Replaced empty `industry` with `'Other'`.
+- Replaced missing `stage` with `'Unknown'`.
+- Removed or NULL-ed invalid percentage values (e.g., `0%`).
 
----
-
-## 📂 File Structure
-
-- `layoffs_data_cleaning.sql` — Full SQL script for cleaning the data
-- `README.md` — Project description and explanation (this file)
+### 4. Column Cleanup
+- Removed intermediate columns used for transformation (`row_num`, raw `date`).
 
 ---
 
-## 📊 Tools Used
+## 📊 Exploratory Data Analysis (EDA)
 
-- MySQL
-- SQL Window Functions (`ROW_NUMBER`, `PARTITION BY`)
-- CTEs, string functions, date manipulation
+After cleaning, SQL-based EDA was conducted to uncover insights into global layoff patterns.
+
+### 🔍 Key EDA Queries:
+- 📈 Total layoffs: Count, sum, average, and maximum layoffs across all events.
+- 🗓️ Layoffs over time: Monthly and quarterly trends.
+- 🏢 Repeated layoffs: Companies with multiple layoff events.
+- 🌍 Distribution: Layoffs by industry, country, and company stage.
+- 🔁 Rolling totals: Cumulative layoffs tracked globally and per industry over time.
+
+### 💡 Highlights:
+- Identifies the most affected industries and countries.
+- Tracks how layoff events evolved month-by-month.
+- Detects companies with repeated layoff patterns.
+- Compares layoffs across funding stages (e.g., Public vs. Seed).
+
 
 ---
 
-## 🧠 Author
+## 📂 Project Structure
 
-Daniel Siregar  
+- SQL script for data cleaning
+- SQL script for exploratory data analysis
+- `README.md` — Project documentation (this file)
+
+---
+
+## 🛠️ Tools Used
+
+- **MySQL**
+- SQL Window Functions (`ROW_NUMBER()`, `PARTITION BY`, `OVER`)
+- Date manipulation, CTEs, and conditional logic
+
+---
+
+## 👨‍💻 Author
+
+**Daniel Siregar**  
+
+
+---
