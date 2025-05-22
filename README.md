@@ -19,6 +19,17 @@ The original dataset contains the following columns:
 - `date`: Layoff date (timestamp format)
 
 ---
+## 📋 Data Quality Assessment (DQA)
+
+Before data cleaning, I conducted a structured assessment to identify issues such as blanks, formatting inconsistencies, and unclean values. This process is documented in a tracker used to decide what can be fixed and what needs to be acknowledged.
+
+👉 [View Data Cleaning Tracker (Google Sheets)](https://your-link-here)
+
+This tracker helps:
+- Identify column-level issues
+- Quantify affected rows and % impact
+- Document resolutions or limitations
+---
 
 ## 🧹 Data Cleaning Steps
 
